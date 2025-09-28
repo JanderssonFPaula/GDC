@@ -5,7 +5,11 @@
     const pad2 = (n)=> (n<10? '0'+n : ''+n);
     const toBR = (d)=> `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()}`;
     const addDias = (d, n)=> new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
-    const parseBR = (s)=>{ if(!s) return null; const [dd,mm,yy] = s.split('/').map(Number); return new Date(yy, (mm||1)-1, dd||1); };
+    const parseBR = (s)=>{
+      if(!s || typeof s !== 'string') return null;
+      const [dd,mm,yy] = s.split('/').map(Number);
+      return new Date(yy, (mm||1)-1, dd||1);
+    };
 
     const mapSubgrupo = (t)=>{
       const x = Number(t);
@@ -43,23 +47,35 @@
     // ==========================
     // Tabs
     // ==========================
-    $$('.tab').forEach(btn=> btn.addEventListener('click', ()=>{
-      $$('.tab').forEach(b=> b.classList.remove('active'));
-      btn.classList.add('active');
-      const tab = btn.dataset.tab;
-      ['tabela','analitico'].forEach(id=> $('#'+id).classList.add('hidden'));
-      if(tab==='tabela') $('#tabela').classList.remove('hidden');
-      else { $('#analitico').classList.remove('hidden'); renderAnalitico(); }
-    }));
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Esconde todos os painéis
+        document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+        // Remove destaque de todas as abas
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        // Mostra o painel correspondente
+        const tab = btn.getAttribute('data-tab');
+        document.getElementById(tab).classList.remove('hidden');
+        // Destaca a aba ativa
+        btn.classList.add('active');
+        // Se for a aba analítico, renderiza o conteúdo
+        if(tab === 'analitico') renderAnalitico();
+      });
+    });
 
     // ==========================
     // Toolbar
     // ==========================
-    $('#btnNovo').addEventListener('click', ()=> openModal());
-    $('#btnReset').addEventListener('click', ()=>{ if(confirm('Apagar TODOS os dados salvos no navegador?')){ rows = []; save(); renderGrid(); }});
-    $('#btnCols').addEventListener('click', ()=>{
+    const btnNovo = $('#btnNovo');
+    if (btnNovo) btnNovo.addEventListener('click', ()=> openModal());
+
+    const btnReset = $('#btnReset');
+    if (btnReset) btnReset.addEventListener('click', ()=>{ if(confirm('Apagar TODOS os dados salvos no navegador?')){ rows = []; save(); renderGrid(); }});
+
+    const btnCols = $('#btnCols');
+    if (btnCols) btnCols.addEventListener('click', ()=>{
       showAllCols = !showAllCols;
-      $('#btnCols').textContent = 'Ver Colunas: ' + (showAllCols? '🙈 Resumido 🙈' : '🙉 Todas 🙉');
+      btnCols.textContent = 'Ver Colunas: ' + (showAllCols? '🙈 Resumido 🙈' : '🙉 Todas 🙉');
       renderGrid();
     });
 
@@ -96,6 +112,29 @@
       // -------------------------------------------------------
 
       modal.classList.remove('hidden');
+
+      // Remove event listeners antigos (clonando o botão)
+      const oldBtn = document.getElementById('btnSalvar');
+      const newBtn = oldBtn.cloneNode(true);
+      oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+
+      // Adiciona o evento ao novo botão
+      newBtn.addEventListener('click', ()=> {
+        const data = Object.fromEntries(new FormData(form).entries());
+        data.id = Number(data.id || Date.now());
+        if(editIdx===null){
+          rows.push(data);
+        } else {
+          rows[editIdx] = data;
+        }
+        save(); renderGrid(); closeModal();
+      });
+
+      document.querySelectorAll('.cpf-cnpj').forEach(input => {
+        input.addEventListener('input', e => {
+          e.target.value = formatCpfCnpj(e.target.value);
+        });
+      });
     };
     const closeModal = ()=> modal.classList.add('hidden');
     $('#btnClose').addEventListener('click', closeModal);
@@ -193,23 +232,13 @@
       if(ids.includes(e.target.id)) applyRules();
     });
 
-    $('#btnSalvar').addEventListener('click', ()=>{
+    $('#btnSalvar').addEventListener('click', ()=> {
       const data = Object.fromEntries(new FormData(form).entries());
       data.id = Number(data.id || Date.now());
-      if(!data.Data_de_EMISSAO) data.Data_de_EMISSAO = $('#DATA_EMISSAO').value || toBR(new Date());
-
-      // Adicione estas linhas para garantir que os selects dinâmicos sejam salvos:
-      data.MODELO_CUSD = $('#MODELO_CUSD').value;
-      data.MODELO_CCER = $('#MODELO_CCER').value;
-      data.MODELO_OBRAS = $('#MODELO_OBRAS').value;
-
       if(editIdx===null){
-        data.STATUS_CUSD = 'NÃO SE APLICA';
-        data.STATUS_CCER = 'NÃO SE APLICA';
-        data.STATUS_OBRAS = 'NÃO SE APLICA';
         rows.push(data);
       } else {
-        rows[editIdx] = { ...rows[editIdx], ...data };
+        rows[editIdx] = data;
       }
       save(); renderGrid(); closeModal();
     });
@@ -420,8 +449,18 @@
     // ==========================
     $('#DESEJA_RESEBER_EMAIL').addEventListener('change', applyRules);
     [$('#modal'), $('#modalStatus')].forEach(m=> m.addEventListener('click', (e)=>{ if(e.target===m) m.classList.add('hidden'); }));
-    $('#tabTabela').addEventListener('click', ()=>{ document.querySelector('[data-tab="tabela"]').click(); });
-    $('#tabAnalitico').addEventListener('click', ()=>{ document.querySelector('[data-tab="analitico"]').click(); });
+    const btnTabTabela = $('#tabTabela');
+    if (btnTabTabela) {
+      btnTabTabela.addEventListener('click', ()=> {
+        document.querySelector('[data-tab="tabela"]').click();
+      });
+    }
+    const btnTabAnalitico = $('#tabAnalitico');
+    if (btnTabAnalitico) {
+      btnTabAnalitico.addEventListener('click', ()=> {
+        document.querySelector('[data-tab="analitico"]').click();
+      });
+    }
 
     // ==========================
     // Testes automáticos (dev)
@@ -492,50 +531,34 @@
     }
   }
 
-  // Seleciona todos os inputs com a classe cpf-cnpj
-  document.querySelectorAll('.cpf-cnpj').forEach(input => {
-    input.addEventListener('input', e => {
-      e.target.value = formatCpfCnpj(e.target.value);
-    });
-  });
 
-// Função para pegar a data de hoje no formato yyyy-mm-dd
-function hojeISO() {
-  const hoje = new Date();
-  return hoje.toISOString().slice(0, 10);
-}
-
-// Evento para o select de status do sistema no modal de status
-$('#STATUS_SISTEMA').addEventListener('change', function() {
-  if (this.value === 'CONCLUIDO') {
-    $('#DATA_CONCLUSAO').value = hojeISO();
+  // Função para pegar a data de hoje no formato yyyy-mm-dd
+  function hojeISO() {
+    const hoje = new Date();
+    return hoje.toISOString().slice(0, 10);
   }
-});
 
-
-document.addEventListener('DOMContentLoaded', function() {
-  // Máscara CPF/CNPJ
-  document.querySelectorAll('.cpf-cnpj').forEach(input => {
-    input.addEventListener('input', e => {
-      e.target.value = formatCpfCnpj(e.target.value);
-    });
-  });
-
-  // Regra do detalhamento
-  const tipoContrato = document.getElementById('TIPO_DE_CONTRATO');
-  const detalhamento = document.getElementById('DETALHAMENTO');
-  function atualizarDetalhamento() {
-    if (tipoContrato.value === 'SEM OBRAS') {
-      detalhamento.value = 'N/A';
-      detalhamento.readOnly = true;
-      detalhamento.style.background = '#eee';
-    } else {
-      if (detalhamento.value === 'N/A') detalhamento.value = '';
-      detalhamento.readOnly = false;
-      detalhamento.style.background = '';
+  // Evento para o select de status do sistema no modal de status
+  $('#STATUS_SISTEMA').addEventListener('change', function() {
+    if (this.value === 'CONCLUIDO') {
+      $('#DATA_CONCLUSAO').value = hojeISO();
     }
-  }
-  tipoContrato.addEventListener('change', atualizarDetalhamento);
-  atualizarDetalhamento();
-});
+  });
 
+  const btnDownload = document.getElementById('btnDownload');
+  if (btnDownload) {
+    btnDownload.addEventListener('click', function() {
+      const select = document.getElementById('arquivoDownload');
+      const arquivo = select.value;
+      if (arquivo) {
+        const link = document.createElement('a');
+        link.href = arquivo;
+        link.download = arquivo.split('/').pop();
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        alert('Selecione um arquivo para baixar.');
+      }
+    });
+  }

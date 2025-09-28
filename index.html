@@ -48,7 +48,7 @@
       <div class="toolbar">
         <button id="toggleTheme" class="btn">🌙/☀️ Alternar Tema</button>
 
-        
+        <button class="btn btn-primary" id="btnNovo">Cadastrar Novo</button>
         
         <button class="btn" id="btnImport">📩 Importar Excel</button>
         <button class="btn" id="btnExport">📤 Exportar Excel</button>
@@ -60,11 +60,11 @@
 
   <main class="container">
     <div class="card">
-      <div class="tabs">        
-        <button class="btn btn-primary" id="btnNovo">Cadastrar Novo</button>
-        <button class="btn" id="btnCols">Ver Colunas: 🙉 Todas 🙉</button>
-        <button class="btn tab active" id="tabTabela" data-tab="tabela">📈 Tabela</button>
-        <button class="btn tab" id="tabAnalitico" data-tab="analitico">📊 Analítico</button>
+      <div class="tabs">
+        <button class="tab active" data-tab="tabela">Tabela</button>
+        <button class="tab" data-tab="analitico">Analítico</button>
+        <button class="tab" data-tab="downloads">Downloads</button>
+        <button class="tab" data-tab="tutorial">Tutorial</button>
       </div>
 
       <!-- Tabela -->
@@ -103,6 +103,29 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- Downloads -->
+      <section id="downloads" class="tab-panel hidden">
+        <h3>Baixar Modelos</h3>
+        <label for="arquivoDownload">Selecione o arquivo:</label>
+        <select id="arquivoDownload">
+          <option value="" disabled selected>Escolha um arquivo</option>
+          <option value="Download/Autobots_Gerador_de_PDF.xlsm">Excel - Autobots Gerador de PDF (.xlsm)</option>
+          <option value="Download/MODELO_ADITIVO_CCER_GA.docx">Word - MODELO_ADITIVO_CCER_GA.docx</option>
+          <option value="Download/MODELO_ADITIVO_CUSD_GA.docx">Word - MODELO_ADITIVO_CUSD_GA.docx</option>
+          <option value="Download/MODELO_CCER_GA.docx">Word - MODELO_CCER_GA.docx</option>
+          <option value="Download/MODELO_CONTRATO_DE_EXECUCAO_DE_OBRAS.DOCX">Word - MODELO_CONTRATO_DE_EXECUCAO_DE_OBRAS.DOCX</option>
+          <option value="Download/MODELO_CUSD_GA.docx">Word - MODELO_CUSD_GA.docx</option>
+        </select>
+        <div style="margin-top:16px;">
+          <button id="btnDownload" class="btn btn-primary">Baixar</button>
+        </div>
+      </section>
+      <!-- Tutorial -->
+      <section id="tutorial" class="tab-panel hidden">
+        <h3>Tutorial</h3>
+        <iframe src="Tutorial/TutorialGDC.pdf" width="100%" height="600px" style="border:1px solid #ccc;"></iframe>
       </section>
     </div>
 
