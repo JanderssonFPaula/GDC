@@ -514,9 +514,16 @@ $('#STATUS_SISTEMA').addEventListener('change', function() {
 
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Máscara CPF/CNPJ
+  document.querySelectorAll('.cpf-cnpj').forEach(input => {
+    input.addEventListener('input', e => {
+      e.target.value = formatCpfCnpj(e.target.value);
+    });
+  });
+
+  // Regra do detalhamento
   const tipoContrato = document.getElementById('TIPO_DE_CONTRATO');
   const detalhamento = document.getElementById('DETALHAMENTO');
-
   function atualizarDetalhamento() {
     if (tipoContrato.value === 'SEM OBRAS') {
       detalhamento.value = 'N/A';
@@ -528,18 +535,7 @@ document.addEventListener('DOMContentLoaded', function() {
       detalhamento.style.background = '';
     }
   }
-
   tipoContrato.addEventListener('change', atualizarDetalhamento);
   atualizarDetalhamento();
 });
 
-// Certifique-se que o DOM está carregado antes de adicionar o evento
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('btnSalvar').addEventListener('click', function() {
-    // Aqui vai a lógica para salvar os dados do formulário
-    // Exemplo:
-    // const form = document.getElementById('form');
-    // const data = new FormData(form);
-    // ...salvar os dados...
-  });
-});
