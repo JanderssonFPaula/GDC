@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Autobot Gerador de Contratos</title>
+
+  <!-- CSS separado -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- SheetJS para Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+
+  <header>
+    <div class="container">
+      <div class="brand">
+        <svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+        >
+          <!-- Cabeça -->
+          <rect x="14" y="18" width="36" height="28" rx="6" fill="url(#grad)" />
+          <!-- Antena -->
+          <line x1="32" y1="8" x2="32" y2="18" stroke="url(#grad)" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="32" cy="6" r="4" fill="url(#grad)"/>
+          <!-- Olhos -->
+          <circle cx="24" cy="32" r="4" fill="#fff"/>
+          <circle cx="40" cy="32" r="4" fill="#fff"/>
+          <!-- Boca -->
+          <rect x="22" y="40" width="20" height="4" rx="2" fill="#fff"/>
+          
+          <defs>
+            <linearGradient id="grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6EA8FF"/>
+              <stop offset="1" stop-color="#06D6A0"/>
+            </linearGradient>
+          </defs>
+        </svg>
+
+        <div>
+          <h1>Autobot</h1>
+          <small>Gerador de de contratos - Experiencia do Cliente - Goiás</small>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button id="toggleTheme" class="btn">🌙/☀️ Alternar Tema</button>
+
+        
+        
+        <button class="btn" id="btnImport">📩 Importar Excel</button>
+        <button class="btn" id="btnExport">📤 Exportar Excel</button>
+
+        <button class="btn" id="btnReset" title="Limpar tudo (local)">🧹 Limpar Dados</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <div class="tabs">        
+        <button class="btn btn-primary" id="btnNovo">Cadastrar Novo</button>
+        <button class="btn" id="btnCols">Ver Colunas: 🙉 Todas 🙉</button>
+        <button class="btn tab active" id="tabTabela" data-tab="tabela">📈 Tabela</button>
+        <button class="btn tab" id="tabAnalitico" data-tab="analitico">📊 Analítico</button>
+      </div>
+
+      <!-- Tabela -->
+      <section id="tabela" class="tab-panel">
+        <div class="table-wrap">
+          <table id="grid">
+            <thead id="gridHead"></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Analítico -->
+      <section id="analitico" class="tab-panel hidden">
+        <div class="grid">
+          <div class="col-12">
+            <h3>Resumo</h3>
+            <div id="boxResumo" class="grid"></div>
+          </div>
+          <div class="col-12">
+            <h3>Vencidos (+30 dias após emissão)</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>#NUM_UC</th>
+                    <th>Cliente</th>
+                    <th>Emissão</th>
+                    <th>Dias</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="listaVencidos"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <p class="footer">Copyright © 2025 JANDERSSON F DE PAULA. Todos os direitos reservados.</p>
+
+    <!-- Testes (dev) -->
+    <details id="dev-tests">
+      <summary>Testes automáticos (dev)</summary>
+      <ul id="testList"></ul>
+    </details>
+  </main>
+
+  <!-- Modal de Cadastro/Edição -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <strong id="modalTitle">Novo Registro</strong>
+        <div>
+          <button id="btnClose" class="btn">Fechar</button>
+        </div>
+      </div>
+      <!-- Formulario -->
+      <div class="modal-body">
+        <form id="form" class="grid" autocomplete="off">
+          <!-- BLOCO IDENTIFICAÇÃO -->
+
+          <!--ID INICO-->
+          <div class="col-3">
+            <label>ID (auto)</label>
+            <input type="text" name="id" id="id" readonly />
+          </div>
+          <!-- MODELOS / CARTEIRA / TIPO DE CONTRATO -->
+          <div class="col-3">
+            <label>#TIPO_DE_CONTRATO</label>
+            <select name="TIPO_DE_CONTRATO" id="TIPO_DE_CONTRATO">
+              <option value="">Selecione</option>
+              <option>COM OBRAS</option>
+              <option>SEM OBRAS</option>
+            </select>
+          </div>
+          <div class="col-3">
+            <label>#CARTEIRA</label>
+            <select name="CARTEIRA" id="CARTEIRA">
+              <option value="">Selecione</option>
+              <option>PPM METRO</option>
+              <option>METRO 2</option>
+              <option>GOIANIA 2</option>
+              <option>PPM GOIANIA</option>
+              <option>METRO 1</option>
+              <option>GOIANIA 3</option>
+              <option>GOIANIA 1</option>
+              <option>MASTER 2</option>
+              <option>REDES 1</option>
+              <option>REDES 2</option>
+              <option>GD ESPECIAIS</option>
+              <option>MASTER 1</option>
+              <option>PPE</option>
+              <option>PPF/ESTRATEGICAS</option>
+              <option>GA FORMOSA</option>
+              <option>GA LUZIANIA</option>
+              <option>PPM FORMOSA</option>
+              <option>PPM LUZIANIA</option>
+              <option>GA ANAPOLIS</option>
+              <option>GA URUAÇU</option>
+              <option>PPM ANAPOLIS</option>
+              <option>PPM URUAÇU</option>
+              <option>GA IPORA</option>
+              <option>PPM IPORA</option>
+              <option>PPM MONTES BELOS</option>
+              <option>GA MONTES BELOS</option>
+              <option>PPM RIO VERDE</option>
+              <option>GA MORRINHOS 1</option>
+              <option>GA MORRINHOS 2</option>
+              <option>GA RIO VERDE</option>
+              <option>PPM MORRINHOS</option>
+            </select>
+          </div>
+          <!--UNIDADE CONSUMIDORA-->
+          <div class="col-3">
+            <label>#NUM_UC</label>
+            <input type="text" name="NUM_UC" id="NUM_UC" required />
+          </div>
+
+          <!--NUMERO DO CONTRATO-->
+          <div class="col-3">
+            <label>#NUM_CONTRATO</label>
+            <input type="text" name="NUM_CONTRATO" id="NUM_CONTRATO" />
+          </div>
+          <!--NUMERO DE EXECUÇÃO DA OBRA-->
+          <div class="col-3">
+            <label>#NUM_DE_EXECUCAO_DE_OBRA</label>
+            <input type="text" name="NUM_DE_EXECUCAO_DE_OBRA" id="NUM_DE_EXECUCAO_DE_OBRA" />
+          </div>
+          <!--NUMERO DO ADITIVO DO CONTRATO-->
+          <div class="col-3">
+            <label>#NUM_ADITIVO</label>
+            <input type="text" name="NUM_ADITIVO" id="NUM_ADITIVO" />
+          </div>
+
+          <!-- NUMERO DO SSGA-->
+          <div class="col-3">
+            <label>#NUM_SSGA</label>
+            <input type="text" name="NUM_SSGA" id="NUM_SSGA" />
+          </div>
+          <!--DATA DE INICO SSGA-->
+          <div class="col-3">
+            <label>#DATA_DE_ENTRADA_SSGA</label>
+            <input type="date" name="DATA_SSGA" id="DATA_SSGA"/>
+          </div>
+          <!--INFORMAÇÕES DO CLIENTE-->
+          <div class="col-6">
+            <label>#NOME_CLIENTE</label>
+            <input type="text" name="NOME_CLIENTE" id="NOME_CLIENTE" />
+          </div>
+
+          <div class="col-3">
+            <label>#CPF_CNPJ</label>
+            <input type="text" name="CPF_CNPJ" id="CPF_CNPJ" class="cpf-cnpj" maxlength="18" />
+          </div>
+
+          <div class="col-3">
+            <label>#DESEJA_RESEBER_EMAIL</label>
+            <select name="DESEJA_RESEBER_EMAIL" id="DESEJA_RESEBER_EMAIL">
+              <option>SIM</option>
+              <option>NÃO</option>
+            </select>
+          </div>
+
+          <div class="col-6">
+            <label>#EMAIL</label>
+            <input type="text" name="EMAIL" id="EMAIL" />
+          </div>
+
+          <!--INFORMAÇÕES DA UC-->
+          <div class="col-3">
+            <label>#CODIGO_CNAE</label>
+            <input type="text" name="CODIGO_CNAE" id="CODIGO_CNAE" />
+          </div>
+          <div class="col-3">
+            <label>#ATIVIDADE</label>
+            <input type="text" name="ATIVIDADE" id="ATIVIDADE" />
+          </div>
+
+          <!--INFORMAÇÕES DO ENDEREÇO-->
+          <div class="col-3">
+            <label>#CEP</label>
+            <input type="text" name="CEP" id="CEP" />
+          </div>
+
+          <div class="col-6">
+            <label>#ENDERECO</label>
+            <input type="text" name="ENDERECO" id="ENDERECO" />
+          </div>
+
+          <div class="col-3">
+            <label>#LOCALIDADE_CIDADE</label>
+            <input type="text" name="LOCALIDADE_CIDADE" id="LOCALIDADE_CIDADE" list="dl_loc" />
+            <datalist id="dl_loc">
+              <option>SILVOLANDIA</option>
+              <option>NOVO PLANALTO II</option>
+              <option>MIRANDOPOLIS</option>
+              <option>CAPELINHA II</option>
+              <option>PALMEUNA</option>
+              <option>LUCILANDIA</option>
+              <option>CLAUDINAPOLIS</option>
+              <option>JANDAIA</option>
+              <option>PLANURA VERDE</option>
+              <option>SANCLERLANDIA</option>
+              <option>TURVANIA</option>
+              <option>CACHOEIRA DE GOIAS</option>
+              <option>JUSSARA</option>
+              <option>MOSSAMEDES</option>
+              <option>PALMINOPOLIS</option>
+              <option>AMERICANO DO BRASIL</option>
+              <option>ITAPIRAPUA</option>
+              <option>MONTES CLAROS DE GOIAS</option>
+              <option>NOVO BRASIL</option>
+              <option>APARECIDA - POV</option>
+              <option>CEZARINA</option>
+              <option>CAMPO DAS PERDIZES</option>
+              <option>BURITI DE GOIAS</option>
+              <option>LAGES - POV</option>
+              <option>ARAGUAPAZ</option>
+              <option>SAO BENEDITO I</option>
+              <option>ARAGARCAS</option>
+              <option>ROSALANDIA</option>
+              <option>SERRANOPOLIS</option>
+              <option>SANTA FE DE GOIAS</option>
+              <option>BRITANIA</option>
+              <option>SAO JOSE DO RETIRO - POV</option>
+              <option>LINDA VISTA</option>
+              <option>BACILANDIA</option>
+              <option>CHOUPANA</option>
+              <option>ADELANDIA</option>
+              <option>ARUANA</option>
+              <option>FAINA</option>
+              <option>APARECIDA DO RIO CLARO</option>
+              <option>INDIARA</option>
+              <option>SANTA RITA - POV</option>
+              <option>DIOLANDIA</option>
+              <option>FERNANDOPOLIS</option>
+              <option>CALCILANDIA</option>
+              <option>SANTO ANTONIO II</option>
+              <option>MORRO AGUDO DE GOIAS</option>
+              <option>SAO JOSE</option>
+              <option>BRASILANDIA I</option>
+              <option>MORUMBI</option>
+              <option>SAO PEDRO</option>
+              <option>SANTO ANTONIO III</option>
+              <option>COLONIA DE UVA</option>
+              <option>CIBELE</option>
+              <option>SANTA MARIA IV - POV</option>
+              <option>LUA NOVA</option>
+              <option>MATRINCHA</option>
+              <option>BOA VISTA</option>
+              <option>GONGOME - POV</option>
+              <option>QUEIXADA - POV</option>
+              <option>ESPIRITO SANTO - POV</option>
+              <option>PADIOLANDIA - POV</option>
+              <option>RIBEIRAO DO MEIO</option>
+              <option>SAO JOAO I - POV</option>
+              <option>CAPIVARI - POV</option>
+              <option>MORRO ALTO</option>
+              <option>SAO JOSE DA LAGINHA</option>
+              <option>LOBEIRA</option>
+              <option>CAMPO ALEGRE</option>
+              <option>CESAREIA</option>
+              <option>SAO SEBASTIAO DO RIO CLARO</option>
+              <option>PONTE ALTA</option>
+              <option>CENTROLANDIA</option>
+              <option>GAMELEIRA - POV</option>
+              <option>ASSENTAMENTO PONTE DE PEDRA</option>
+              <option>LOBEIRA II</option>
+              <option>OLARIA DO ANGICO</option>
+              <option>LAGOA DO BAUZINHO</option>
+              <option>ARANTINA</option>
+              <option>ITAGUACU</option>
+              <option>RIO VERDE</option>
+              <option>MAURILANDIA</option>
+              <option>CACHOEIRA ALTA</option>
+              <option>CACU</option>
+              <option>TURVELANDIA</option>
+              <option>CASTELANDIA</option>
+              <option>PARANAIGUARA</option>
+              <option>SAO SIMAO</option>
+              <option>LUZIANIA</option>
+              <option>ANAPOLIS</option>
+              <option>JARAGUA</option>
+              <option>PIRENOPOLIS</option>
+              <option>CORUMBA DE GOIAS</option>
+              <option>INTERLANDIA</option>
+              <option>PETROLINA DE GOIAS</option>
+              <option>SOUZANIA</option>
+              <option>ABADIANIA</option>
+              <option>OURO VERDE DE GOIAS</option>
+              <option>ITABERAI</option>
+              <option>GOIAS</option>
+              <option>ITAPURANGA</option>
+              <option>ITAGUARU</option>
+              <option>TAQUARAL DE GOIAS</option>
+              <option>HEITORAI</option>
+              <option>MOZARLANDIA</option>
+              <option>NAZARIO</option>
+              <option>QUIRINOPOLIS</option>
+              <option>SANTA HELENA DE GOIAS</option>
+              <option>GOUVELANDIA</option>
+              <option>ACREUNA</option>
+              <option>LAGO AZUL - POV</option>
+              <option>RIO VERDE - POV</option>
+              <option>TRES VEREDAS</option>
+              <option>DOMICIANO RIBEIRO</option>
+              <option>MANIRATUBA</option>
+              <option>SANTA BARBARA III</option>
+              <option>SAO GERALDO</option>
+              <option>SERRA DO OURO</option>
+              <option>TROMBAS II - POV</option>
+              <option>SANTA RITA III - POV</option>
+              <option>BURITI II - POV</option>
+              <option>VAZANTE II - POV</option>
+              <option>POUSO ALTO</option>
+              <option>SAO JOSE DE BAIXO - POV</option>
+              <option>SANTO ANTONIO DA BARRA</option>
+              <option>ITAJA</option>
+              <option>ITARUMA</option>
+              <option>PORTEIRAO</option>
+              <option>INACIOLANDIA</option>
+              <option>MONTIVIDIU</option>
+              <option>APARECIDA DO RIO DOCE</option>
+              <option>LAGOA SANTA</option>
+              <option>MONTE ALTO</option>
+              <option>CRISTALINA</option>
+              <option>SAO BARTOLOMEU</option>
+              <option>SANTO ANTONIO DO DESCOBERTO II</option>
+              <option>SANTO ANTONIO DO DESCOBERTO</option>
+              <option>PEDREGAL</option>
+              <option>CIDADE OCIDENTAL</option>
+              <option>PADRE BERNARDO</option>
+              <option>MARIAPOLIS</option>
+              <option>VALPARAISO DE GOIAS</option>
+              <option>AGUAS LINDAS DE GOIAS</option>
+              <option>ELDORADO MANSOES CAMPESTRE</option>
+              <option>SANTA ISABEL</option>
+              <option>SOUZALANDIA</option>
+              <option>GIRASSOL</option>
+              <option>ALEXANIA</option>
+              <option>SAO FRANCISCO DE GOIAS</option>
+              <option>SANTA ROSA DE GOIAS</option>
+              <option>GOIANESIA</option>
+              <option>POSSE D ABADIA</option>
+              <option>GOIANAPOLIS</option>
+              <option>CAMPO LIMPO DE GOIAS</option>
+              <option>CAFELANDIA</option>
+              <option>BARRO ALTO</option>
+              <option>COCALZINHO DE GOIAS</option>
+              <option>NATINOPOLIS</option>
+              <option>SANTA RITA DO NOVO DESTINO</option>
+              <option>TEREZOPOLIS DE GOIAS</option>
+              <option>JUSCELANDIA</option>
+              <option>PLANALMIRA</option>
+              <option>CORREGO RICO</option>
+              <option>VERMELHO</option>
+              <option>PADRE LUCIO</option>
+              <option>RADIOLANDIA</option>
+              <option>JESUPOLIS</option>
+              <option>CAPELINHA I</option>
+              <option>GOIALANDIA</option>
+              <option>VILA SAO VICENTE</option>
+              <option>SANTO ANTONIO DA LAGUNA</option>
+              <option>OLHO DAGUA - POV</option>
+              <option>VILA PROPICIO</option>
+              <option>CAMPO ALEGRE II</option>
+              <option>LIMOEIRO</option>
+              <option>MIRILANDIA</option>
+              <option>VILA NOSSA SRA APARECIDA</option>
+              <option>PALESTINA II</option>
+              <option>VENIAPOLIS</option>
+              <option>PLACA II</option>
+              <option>SANTO ANTONIO</option>
+              <option>CAPELA DO RIO DO PEIXE</option>
+              <option>CAXAMBU</option>
+              <option>GOIANOPOLIS - POV</option>
+              <option>LAGOLANDIA</option>
+              <option>RIBEIRAO DO INDIO - POV</option>
+              <option>LAGOA PATO SELVAGEM</option>
+              <option>TREVO DO ZE ROSARIO - POV</option>
+              <option>ALVORADA II</option>
+              <option>EDILANDIA</option>
+              <option>MAMONEIRA - POV</option>
+              <option>VILA NOVA III - POV</option>
+              <option>LAGES III</option>
+              <option>RIO PRETO - POV</option>
+              <option>CANA BRAVA I - POV</option>
+              <option>LEVANTADO - POV</option>
+              <option>FORMOSA</option>
+              <option>CAVALCANTE</option>
+              <option>CAMPOS BELOS</option>
+              <option>CABECEIRAS</option>
+              <option>POSSE</option>
+              <option>SITIO D ABADIA</option>
+              <option>ALVORADA DO NORTE</option>
+              <option>DAMIANOPOLIS</option>
+              <option>AGUAS DE SAO JOAO</option>
+              <option>CRUZEIRO III</option>
+              <option>ASSUNCAO DE GOIAS</option>
+              <option>ALVELANDIA</option>
+              <option>SANTA LUCIA</option>
+              <option>MORADA DO SOL</option>
+              <option>MOINHO</option>
+              <option>SANTIAGO</option>
+              <option>LAGOA</option>
+              <option>SANTA MARIA II</option>
+              <option>IACIARA</option>
+              <option>MAMBAI</option>
+              <option>GUARANI DE GOIAS</option>
+              <option>MONTE ALEGRE DE GOIAS</option>
+              <option>BARREIRAO</option>
+              <option>SIMOLANDIA</option>
+              <option>DIVINOPOLIS DE GOIAS</option>
+              <option>TERESINA DE GOIAS</option>
+              <option>BURITINOPOLIS</option>
+              <option>SAO JOAO D ALIANCA</option>
+              <option>ALTO PARAISO DE GOIAS</option>
+              <option>SAO GABRIEL DE GOIAS</option>
+              <option>AGUA FRIA DE GOIAS</option>
+              <option>MATO SECO</option>
+              <option>VAZANTE - POV</option>
+              <option>AGUA QUENTE</option>
+              <option>ESCARAMUCA</option>
+              <option>VARZEA</option>
+              <option>VILA REIS - POV</option>
+              <option>CABECEIRA DA MATA I - POV</option>
+              <option>SAO VICENTE</option>
+              <option>ESTIVA</option>
+              <option>RODOVILANDIA</option>
+              <option>MACHADO - POV</option>
+              <option>POSSE - POV</option>
+              <option>PLACA</option>
+              <option>CRUZEIRINHO</option>
+              <option>VILA NOVA I - POV</option>
+              <option>PICADA - POV</option>
+              <option>JAMBREIRO - POV</option>
+              <option>BARU - POV</option>
+              <option>BARBOSELANDIA</option>
+              <option>BOA ESPERANCA - POV</option>
+              <option>AGUA BOA</option>
+              <option>CAPAO</option>
+              <option>CANA BRAVA - POV</option>
+              <option>POCO - POV</option>
+              <option>VILA BURITI ALTO - POV</option>
+              <option>MUNDO NOVO - POV</option>
+              <option>IMPOEIRA - POV</option>
+              <option>SALOBRO - POV</option>
+              <option>SAO SEBASTIAO DE NOVA ROMA</option>
+              <option>SAO JORGE</option>
+              <option>PROJETO AGUAS CLARAS</option>
+              <option>SANTA RITA II - POV</option>
+              <option>TAQUARIZAL</option>
+              <option>OUROMINAS</option>
+              <option>BOA VISTA IV</option>
+              <option>MUCAMBO FIRME - POV</option>
+              <option>CORMARI - POV</option>
+              <option>DISTRITO DO PRATA</option>
+              <option>RIACHO DOS CAVALOS</option>
+              <option>NOVA VISTA</option>
+              <option>PORTEIRAS</option>
+              <option>CAICARA - POV</option>
+              <option>SAO JOAO EVANGELISTA - POV</option>
+              <option>SAO DOMINGOS</option>
+              <option>NOVA ROMA</option>
+              <option>CARMO DO RIO VERDE</option>
+              <option>URUANA</option>
+              <option>NOVO GOIAS</option>
+              <option>CARLANDIA</option>
+              <option>ARARAS</option>
+              <option>CEDRO III - POV</option>
+              <option>MANGUEIRA</option>
+              <option>VERA CRUZ</option>
+              <option>BUENOLANDIA</option>
+              <option>JEROAQUARA</option>
+              <option>CAPELINHA DOS GOMES</option>
+              <option>SERRA DOURADA</option>
+              <option>BARREIRA BRANCA</option>
+              <option>OLARIA DO ALECRIM - POV</option>
+              <option>TRAJANOPOLIS</option>
+              <option>MIMOSO DE GOIAS</option>
+              <option>JARDIM DO INGA</option>
+              <option>CEU AZUL</option>
+              <option>CAMPO LINDO</option>
+              <option>ARTULANDIA</option>
+              <option>APARECIDA DE LOIOLA</option>
+              <option>VERDELANDIA</option>
+              <option>MORRO BRANCO</option>
+              <option>FLORES DE GOIAS</option>
+              <option>GUARAITA</option>
+              <option>BETANIA</option>
+              <option>REGISTRO DO ARAGUAIA</option>
+              <option>JACILANDIA</option>
+              <option>CARMOLANDIA II</option>
+              <option>PONCIONARIO</option>
+              <option>CAICARA</option>
+              <option>SAO LUIS DE MONTES BELOS</option>
+              <option>PALMEIRAS DE GOIAS</option>
+              <option>ITAGUARI</option>
+              <option>FIRMINOPOLIS</option>
+              <option>ANICUNS</option>
+              <option>PARAUNA</option>
+              <option>AVELINOPOLIS</option>
+              <option>SAO JOAO DA PARAUNA</option>
+              <option>AURILANDIA</option>
+              <option>CORREGO DO OURO</option>
+              <option>FAZENDA NOVA</option>
+              <option>NOVO GAMA</option>
+              <option>JARANAPOLIS</option>
+              <option>SANTA ROSA - POV</option>
+              <option>VILA BOA</option>
+              <option>BEZERRA</option>
+              <option>PLANALTINA</option>
+              <option>JK</option>
+              <option>CLARETIANA</option>
+              <option>OUROANA</option>
+              <option>RIVERLANDIA</option>
+              <option>QUINO</option>
+              <option>PLANALTO VERDE</option>
+              <option>OLARIA DA FUMACA</option>
+              <option>SANTA CRUZ DAS LAGES</option>
+              <option>GOIANIA</option>
+              <option>CHAPADAO DO CEU</option>
+              <option>APORE</option>
+              <option>ESTRELA D ALVA</option>
+              <option>PALESTINA DE GOIAS</option>
+              <option>JATAI</option>
+              <option>IPORA</option>
+              <option>CAIAPONIA</option>
+              <option>AMORINOPOLIS</option>
+              <option>ISRAELANDIA</option>
+              <option>JAUPACI</option>
+              <option>MINEIROS</option>
+              <option>MESSIANOPOLIS</option>
+              <option>MOIPORA</option>
+              <option>PORTELANDIA</option>
+              <option>DIORAMA</option>
+              <option>GOIAPORA</option>
+              <option>IVOLANDIA</option>
+              <option>PILOANDIA</option>
+              <option>BOM JARDIM DE GOIAS</option>
+              <option>ARENOPOLIS</option>
+              <option>PIRANHAS</option>
+              <option>SANTA RITA DO ARAGUAIA</option>
+              <option>PEROLANDIA</option>
+              <option>NAVESLANDIA</option>
+              <option>BALIZA</option>
+              <option>ESTANCIA</option>
+              <option>CAMPOS VERDES II</option>
+              <option>DOVERLANDIA</option>
+              <option>SAO SEBASTIAO DO RIO CLARO I</option>
+              <option>ZELANDIA</option>
+              <option>ALTO DA BOA VISTA</option>
+              <option>PEDROLANDIA</option>
+              <option>ITUMIRIM - POV</option>
+              <option>DISTRITO DE UBATAN</option>
+              <option>CANA BRAVA</option>
+              <option>ROCHELANDIA</option>
+              <option>DOIS IRMAOS II</option>
+              <option>BURITIZINHO</option>
+              <option>CORUMBAZUL</option>
+              <option>ALMERINDONOPOLIS</option>
+              <option>NILOPOLIS</option>
+              <option>MARCIANOPOLIS</option>
+              <option>GUARILANDIA</option>
+              <option>VENDA SECA</option>
+              <option>MONTES CLAROS</option>
+              <option>SANTA CRUZ DE GOIAS</option>
+              <option>PIRES BELO</option>
+              <option>DAVINOPOLIS</option>
+              <option>MARCELANDIA</option>
+              <option>PIRACANJUBA</option>
+              <option>CACHOEIRA DOURADA</option>
+              <option>GOIATUBA</option>
+              <option>MORRINHOS</option>
+              <option>PONTALINA</option>
+              <option>PANAMA</option>
+              <option>BURITI ALEGRE</option>
+              <option>AGUA LIMPA</option>
+              <option>PALMELO</option>
+              <option>PIRES DO RIO</option>
+              <option>CROMINIA</option>
+              <option>MAIRIPOTABA</option>
+              <option>CORUMBAIBA</option>
+              <option>JOVIANIA</option>
+              <option>IPAMERI</option>
+              <option>URUTAI</option>
+              <option>ALOANDIA</option>
+              <option>ITUMBIARA</option>
+              <option>CALDAS NOVAS</option>
+              <option>PROFESSOR JAMIL</option>
+              <option>PEROBAS - POV</option>
+              <option>MARZAGAO</option>
+              <option>VERISSIMO</option>
+              <option>EDEIA</option>
+              <option>EDEALINA</option>
+              <option>CAMPO ALEGRE DE GOIAS</option>
+              <option>BOM JESUS DE GOIAS</option>
+              <option>MEIA PONTE - POV</option>
+              <option>RANCHO ALEGRE</option>
+              <option>USINA ROCHEDO</option>
+              <option>CENTRO ESTULANDIA</option>
+              <option>VICENTINOPOLIS</option>
+              <option>ANHANGUERA</option>
+              <option>CATALAO</option>
+              <option>CUMARI</option>
+              <option>GOIANDIRA</option>
+              <option>ORIZONA</option>
+              <option>TRES RANCHOS</option>
+              <option>OUVIDOR</option>
+              <option>NOVA AURORA</option>
+              <option>SESMARIA</option>
+              <option>DOIS IRMAOS</option>
+              <option>RIO QUENTE</option>
+              <option>RONELANDIA</option>
+              <option>SARANDI</option>
+              <option>CORUMBAJUBA</option>
+              <option>SANTA BARBARA II</option>
+              <option>SANTO ANTONIO DO RIO PEIXE</option>
+              <option>CACHOEIRA</option>
+              <option>TAQUARAL DA CAPELA - POV</option>
+              <option>SERRA NEGRA</option>
+              <option>ESPRAIADO - POV</option>
+              <option>FIRMEZA</option>
+              <option>JUNQUERLANDIA - POV</option>
+              <option>PARAISO - POV</option>
+              <option>SAPE - POV</option>
+              <option>NOSSA SENHORA DE FATIMA - POV</option>
+              <option>VILA SUCENA - POV</option>
+              <option>OLHO D AGUA III - POV</option>
+              <option>PEDRA BRANCA</option>
+              <option>AREIAO</option>
+              <option>CAVALHEIROS</option>
+              <option>TOMAZINOPOLIS</option>
+              <option>TREVO FLORESTA - POV</option>
+              <option>SANTO ANTONIO DO RIO VERDE</option>
+              <option>CERES</option>
+              <option>SAO PATRICIO</option>
+              <option>IPIRANGA DE GOIAS</option>
+              <option>MINACU</option>
+              <option>UIRAPURU</option>
+              <option>CRUZEIRO VI</option>
+              <option>CAXIAS DE GOIAS</option>
+              <option>NOVA VILA</option>
+              <option>SANTO ANTONIO DA CANA BRAVA</option>
+              <option>SAO PATRICIO</option>
+              <option>IPIRANGA DE GOIAS</option>
+              <option>JK I</option>
+              <option>MANDINOPOLIS</option>
+              <option>PILAR CRUZ</option>
+              <option>XIXA - POV</option>
+              <option>ASINOPOLIS</option>
+              <option>ALTO HORIZONTE</option>
+              <option>MATA AZUL</option>
+              <option>MONTIVIDIU DO NORTE</option>
+              <option>VILA APARECIDA DE GOIAS</option>
+              <option>COLINAS DO SUL</option>
+              <option>GRUPELANDIA</option>
+              <option>LAVRAS - POV</option>
+              <option>DUTRALINA</option>
+              <option>AMARALINA</option>
+              <option>LUZELANDIA</option>
+              <option>PILAR DE GOIAS</option>
+              <option>POSSELANDIA II</option>
+              <option>SAO LUIZ DO NORTE</option>
+              <option>ITAPACI</option>
+              <option>URUACU</option>
+              <option>RUBIATABA</option>
+              <option>BRAGOLANDIA</option>
+              <option>SAO MIGUEL DO ARAGUAIA</option>
+              <option>PORANGATU</option>
+              <option>HIDROLINA</option>
+              <option>NOVA GLORIA</option>
+              <option>CAMPINORTE</option>
+              <option>NOVA AMERICA</option>
+              <option>MARA ROSA</option>
+              <option>CAPELINHA - POV</option>
+              <option>MUTUNOPOLIS</option>
+              <option>FORMOSO</option>
+              <option>ESTRELA DO NORTE</option>
+              <option>SANTA TEREZA DE GOIAS</option>
+              <option>PONTE NOVA</option>
+              <option>SANTA TEREZINHA DE GOIAS</option>
+              <option>CRIXAS</option>
+              <option>NOVO PLANALTO</option>
+              <option>TROMBAS</option>
+              <option>CRUZEIRO DO NORTE</option>
+              <option>URUALINA</option>
+              <option>NIQUELANDIA</option>
+              <option>CRUZEIRO</option>
+              <option>VALDELANDIA</option>
+              <option>GUARINOS</option>
+              <option>CAMPOS VERDES</option>
+              <option>AURIVERDE</option>
+              <option>TUCHELANDIA</option>
+              <option>VILA TAVEIRA</option>
+              <option>CEDROLINA</option>
+              <option>VILA SERTANEJA</option>
+              <option>MUNDO NOVO</option>
+              <option>SERRA DE CAMPOS</option>
+              <option>INDAIANOPOLIS</option>
+              <option>LINDA VISTA II</option>
+              <option>BONOPOLIS</option>
+              <option>BAUNILHA</option>
+              <option>TUPIRACABA</option>
+              <option>RECANTO 3 BARRAS</option>
+              <option>MACHADINHO - POV</option>
+              <option>LUIZ ALVES</option>
+              <option>SAO SEBASTIAO</option>
+              <option>LAGINOPOLIS</option>
+              <option>CACULANDIA - POV</option>
+              <option>MUQUEM - POV</option>
+              <option>CRUZEIRO DO NORTE II</option>
+              <option>VERA CRUZ I</option>
+              <option>ESTREITO</option>
+              <option>GERIACU (MATAO)</option>
+              <option>TATAIRA</option>
+              <option>MARTINOPOLIS</option>
+              <option>TREVO</option>
+              <option>VILA SAO PEDRO - POV</option>
+              <option>VILA BORBA - POV</option>
+              <option>PATRIMONIO DO BURITI - POV</option>
+              <option>LAJES II - POV</option>
+              <option>FIICOLANDIA - AMARALINA</option>
+              <option>GOIATABA</option>
+              <option>FIICOLANDIA - MARA ROSA</option>
+              <option>RASTA BANDEIRA</option>
+              <option>VILA CANALINA</option>
+              <option>CAMPINACU</option>
+              <option>COLINACU - POV</option>
+              <option>JERUSALEM</option>
+              <option>MATA DO IMBE - POV</option>
+              <option>FUNIL</option>
+              <option>BARREIRA DA BENVINDA</option>
+              <option>AGUA BRANCA</option>
+              <option>CLUBE DOS 30</option>
+              <option>COQUEIRO DE GALHO</option>
+              <option>SANTO ANTONIO VII - POV</option>
+              <option>PATRIMONIO DO VICENTE</option>
+              <option>LAVRINHA</option>
+              <option>SANTO AGOSTINHO</option>
+              <option>SAO JOSE DO CAIAMAR</option>
+              <option>CAMPO LIMPO - POV</option>
+              <option>MORRO DE CAMPO - POV</option>
+              <option>AMAROLANDIA</option>
+              <option>NOVA IGUACU DE GOIAS</option>
+              <option>ALTO DA BOA VISTA DOS AGUIAR</option>
+              <option>VENERANDIA</option>
+              <option>GARIMPINHO - POV</option>
+              <option>QUEBRA LINHA</option>
+              <option>VISTA ALEGRE</option>
+              <option>NOVA CRIXAS</option>
+              <option>SAO JOSE DOS BANDEIRANTES</option>
+              <option>INFUSAO</option>
+              <option>CRUZEIRO V</option>
+              <option>POSSELANDIA</option>
+              <option>CAPELINHA</option>
+              <option>MATA FEIA</option>
+              <option>ENGENHEIRO VALENTE</option>
+              <option>GOIA VISTA</option>
+              <option>CRUZEIRO II</option>
+              <option>ADELINOPOLIS (ESMERIL)</option>
+              <option>GERCINAPOLIS</option>
+              <option>INHUMAS</option>
+              <option>TRINDADE</option>
+              <option>ITAUCU</option>
+              <option>NEROPOLIS</option>
+              <option>HIDROLANDIA</option>
+              <option>SENADOR CANEDO</option>
+              <option>APARECIDA DE GOIANIA</option>
+              <option>BELA VISTA DE GOIAS</option>
+              <option>CATURAI</option>
+              <option>DAMOLANDIA</option>
+              <option>NOVA VENEZA</option>
+              <option>BRAZABRANTES</option>
+              <option>GOIANIRA</option>
+              <option>VIANOPOLIS</option>
+              <option>SILVANIA</option>
+              <option>ARAGOIANIA</option>
+              <option>GUAPO</option>
+              <option>ARACU</option>
+              <option>LEOPOLDO DE BULHOES</option>
+              <option>BONFINOPOLIS</option>
+              <option>VARJAO</option>
+              <option>SANTA BARBARA DE GOIAS</option>
+              <option>DEUSLANDIA</option>
+              <option>CAMPESTRE DE GOIAS</option>
+              <option>SANTO ANTONIO DE GOIAS</option>
+              <option>SAO MIGUEL DO PASSA QUATRO</option>
+              <option>ORDALIA - POV</option>
+              <option>NOVA FATIMA</option>
+              <option>SENADOR PARANHOS</option>
+              <option>SANTA MARIA</option>
+              <option>CEDRO</option>
+              <option>CALDAZINHA</option>
+              <option>ROSELANDIA</option>
+              <option>OLOANA</option>
+              <option>SAO BENEDITO II</option>
+              <option>CARAIBA</option>
+              <option>ENGENHO VELHO</option>
+              <option>PONTE FUNDA</option>
+              <option>GAMELEIRA DE GOIAS</option>
+              <option>MUCAMBINHO</option>
+              <option>CONCEICAO</option>
+              <option>ABADIA DE GOIAS</option>
+              <option>CRISTIANOPOLIS</option>
+              <option>BREJO BONITO</option>
+            </datalist>
+          </div>
+
+          <!--BLOCO ELETRICO-->
+          <div class="col-3">
+            <label>#TENSAO_NOMINAL_CONTRATADA_KV</label>
+            <input type="number" name="TENSAO_NOMINAL_CONTRATADA_KV" id="TENSAO" step="0.1"
+              placeholder="13.8 / 34.5 / 69 / 138" />
+          </div>
+
+          <div class="col-3">
+            <label>#SUBGRUPO_TARIFARIO</label>
+            <select name="SUBGRUPO_TARIFARIO" id="SUBGRUPO_TARIFARIO">
+              <option value="">Selecione</option>
+              <option>N/A</option>
+              <option>A4</option>
+              <option>A3-A</option>
+              <option>A3</option>
+              <option>A2</option>
+              <option>OPT-B</option>
+            </select>
+          </div>
+
+          <div class="col-3">
+            <label>#MODALIDADE_DE_ACESSO</label>
+            <input type="text" name="MODALIDADE_DE_ACESSO" id="MODALIDADE_DE_ACESSO"/>
+          </div>
+
+          <div class="col-3">
+            <label>#TIPO_DE_ACESSANTE</label>
+            <select name="TIPO_DE_ACESSANTE" id="TIPO_DE_ACESSANTE">
+              <option value="">Selecione</option>
+              <option>N/A</option>
+              <option>CATIVO</option>
+              <option>LIVRE</option>
+              <option>GERAÇÃO COM FORNECIMENTO SCEE</option>
+            </select>
+          </div>
+
+          <div class="col-3">
+            <label>#CLASSE_DE_CONSUMO</label>
+            <select name="CLASSE_DE_CONSUMO" id="CLASSE_DE_CONSUMO">
+              <option value="">Selecione</option>
+              <option>N/A</option>
+              <option>RESIDENCIAL</option>
+              <option>COMERCIAL</option>
+              <option>INDUSTRIAL</option>
+              <option>PODER PUBLICO</option>
+              <option>RURAL</option>
+              <option>SERVIÇO PÚBLICO</option>
+            </select>
+          </div>
+
+          <div class="col-3">
+            <label>#POTENCIA_INSTALADA_KVA</label>
+            <input type="number" name="POTENCIA_INSTALADA_KVA" id="POT_KVA" step="0.01" />
+          </div>
+
+          <!--GERAÇÃO DISTRIBUIDA-->
+          <div class="col-3">
+            <label>#POTENCIA_INSTALADA_KW_GD</label>
+            <input type="number" step="0.01" name="POTENCIA_INSTALADA_KW_GD" id="POTENCIA_INSTALADA_KW_GD" />
+          </div>
+          <div class="col-3">
+            <label>#CARGA_PROPRIA_KW_GD</label>
+            <input type="number" step="0.01" name="CARGA_PROPRIA_KW_GD" id="CARGA_PROPRIA_KW_GD" />
+          </div>
+          <div class="col-3">
+            <label>#DEMANDA_GERACAO_KW_GD</label>
+            <input type="number" step="0.01" name="DEMANDA_GERACAO_KW_GD" id="DEMANDA_GERACAO_KW_GD" />
+          </div>
+
+          <div class="col-3">
+            <label>#PROPRIEDADE_DAS_INSTALACOES</label>
+            <input type="text" name="PROPRIEDADE_DAS_INSTALACOES" id="PROPRIEDADE_DAS_INSTALACOES"  />
+          </div>
+
+          <div class="col-3">
+            <label>#DEMANDA_CONTRATADA</label>
+            <input type="text" name="DEMANDA_CONTRATADA" id="DEMANDA_CONTRATADA"  />
+          </div>
+          <div class="col-3">
+            <label>#PERDAS_DE_TRANSFROMACAO%</label>
+            <input type="text" name="PERDAS_DE_TRANSFROMACAO%" id="PERDAS_DE_TRANSFROMACAO%"  />
+          </div>
+          <div class="col-3">
+            <label>#LOCAL_DA_MEDICAO</label>
+            <input type="text" name="LOCAL_DA_MEDICAO" id="LOCAL_DA_MEDICAO"  />
+          </div>
+          <div class="col-3">
+            <label>#MODALIDADE_TARIFARIA</label>
+            <select name="MODALIDADE_TARIFARIA" id="MODALIDADE_TARIFARIA">
+              <option value="">Selecione</option>
+              <option>N/A</option>
+              <option>THS_VERDE</option>
+              <option>THS_AZUL</option>
+              <option>OPTANTE_B</option>
+            </select>
+          </div>
+
+          <div class="col-3">
+            <label>#UNICA_KW</label>
+            <input type="number" step="0.01" name="UNICA_KW" id="UNICA_KW" />
+          </div>
+
+          <div class="col-3">
+            <label>#DEMANDA_MÁXIMA_MEDICAO_KV</label>
+            <input type="number" step="0.01" name="DEMANDA_MÁXIMA_MEDICAO_KV" id="DEMANDA_MÁXIMA_MEDICAO_KV" />
+          </div>
+
+          <div class="col-3">
+            <label>#DEMANDA_PREVISTA</label>
+            <input type="number" step="0.01" name="DEMANDA_PREVISTA" id="DEMANDA_PREVISTA" />
+          </div>
+
+          <div class="col-3">
+            <label>#PONTA</label>
+            <input type="text" name="PONTA" id="PONTA"  />
+          </div>
+
+          <div class="col-3">
+            <label>#FORA_PORNTA</label>
+            <input type="text" name="FORA_PORNTA" id="FORA_PORNTA"  />
+          </div>
+
+          <div class="col-3">
+            <label>#CUSTO_TOTAL_DA_OBRA</label>
+            <input type="text" name="CUSTO_TOTAL_DA_OBRA" id="CUSTO_TOTAL_DA_OBRA" class="moeda" />
+          </div>
+
+          <div class="col-3">
+            <label>#ENCARGO_DE_RESPONSABILIDADE_DA_ACESSADA_ERD</label>
+            <input type="text" name="ENCARGO_DE_RESPONSABILIDADE_DA_ACESSADA_ERD"
+              id="ENCARGO_DE_RESPONSABILIDADE_DA_ACESSADA_ERD" class="moeda" />
+          </div>
+
+          <div class="col-3">
+            <label>#CUSTO_DA_OBRA_PARA_ATENDIMENTO_DO_CONSUMIDOR</label>
+            <input type="text" name="CUSTO_DA_OBRA_PARA_ATENDIMENTO_DO_CONSUMIDOR"
+              id="CUSTO_DA_OBRA_PARA_ATENDIMENTO_DO_CONSUMIDOR" class="moeda" />
+          </div>
+
+          <div class="col-3">
+            <label>#PARTICIPAÇÃO_FINANCEIRA_DO_CONSUMIDOR_PFO</label>
+            <input type="text" name="PARTICIPAÇÃO_FINANCEIRA_DO_CONSUMIDOR_PFO"
+              id="PARTICIPAÇÃO_FINANCEIRA_DO_CONSUMIDOR_PFO" class="moeda" />
+          </div>
+
+          <div class="col-3">
+            <label>#VALOR_ORCAMENTARIO_LEI_14_133</label>
+            <input type="text" name="VALOR_ORCAMENTARIO_LEI_14_133" id="VALOR_ORCAMENTARIO_LEI_14_133" class="moeda"  />
+          </div>
+          <div class="col-3">
+            <label>#VALOR_ORCAMENTARIO_LEI_8_666</label>
+            <input type="text" name="VALOR_ORCAMENTARIO_LEI_8_666" id="VALOR_ORCAMENTARIO_LEI_8_666" class="moeda"  />
+          </div>
+          <div class="col-3">
+            <label>#VALOR_ORCAMENTARIO_LEI_13_303</label>
+            <input type="text" name="VALOR_ORCAMENTARIO_LEI_13_303" id="VALOR_ORCAMENTARIO_LEI_13_303" class="moeda" />
+          </div>
+
+          <!-- CAMPO LIVRE: Detalhamento -->
+          <div class="col-12">
+            <label>#DETALHAMENTO_DA_OBRA_A_SER_REALIZADA (até 3000 caracteres)</label>
+            <textarea name="DETALHAMENTO" id="DETALHAMENTO" rows="4" maxlength="3000"></textarea>
+          </div>
+
+          <div class="col-3">
+            <label>#DOTACAO_N_CONTA</label>
+            <input type="text" name="DOTACAO_N_CONTA" id="DOTACAO_N_CONTA"  />
+          </div>
+          <div class="col-3">
+            <label>#DOTACAO_NATUREZA_DESPESA</label>
+            <input type="text" name="DOTACAO_NATUREZA_DESPESA" id="DOTACAO_NATUREZA_DESPESA"  />
+          </div>
+          <div class="col-3">
+            <label>#DOTACAO_FONTE_DE_RECURSO</label>
+            <input type="text" name="DOTACAO_FONTE_DE_RECURSO" id="DOTACAO_FONTE_DE_RECURSO"  />
+          </div>
+
+          <div class="col-3">
+            <label>#DISPENSA_INEXIGIBILIDADE </label>
+            <select name="DISPENSA_INEXIGIBILIDADE " id="DISPENSA_INEXIGIBILIDADE ">
+              <option value="">Selecione</option>
+              <option>N/A</option>
+              <option>DISPENSA</option>
+              <option>INEXIGIBILIDADE</option>
+            </select>
+          </div>
+          <div class="col-3">
+            <label>#INCISO</label>
+            <input type="text" name="INCISO" id="INCISO"  />
+          </div>
+          <div class="col-3">
+            <label>#ARTIGO</label>
+            <input type="text" name="ARTIGO" id="ARTIGO" />
+          </div>
+          <div class="col-3">
+            <label>#PROCESSO_DISPENSA_INEXIGIBILIDADE</label>
+            <input type="text" name="PROCESSO_DISPENSA_INEXIGIBILIDADE" id="PROCESSO_DISPENSA_INEXIGIBILIDADE" />
+          </div>
+          <div class="col-3">
+            <label>#DATA_PUBLICACAO_DISPENSA_INEXIGIBILIDADE</label>
+            <input type="date" name="DATA_PUBLICACAO_DISPENSA_INEXIGIBILIDADE"
+              id="DATA_PUBLICACAO_DISPENSA_INEXIGIBILIDADE"  />
+          </div>
+          <div class="col-3">
+            <label>#RESOLUCAO_AUTORIZATIVA</label>
+            <input type="text" name="RESOLUCAO_AUTORIZATIVA" id="RESOLUCAO_AUTORIZATIVA"  />
+          </div>
+          <div class="col-3">
+            <label>#PRAZO_DE_VIGENCIA</label>
+            <input type="text" name="PRAZO_DE_VIGENCIA" id="PRAZO_DE_VIGENCIA" value="12 Meses" readonly />
+          </div>
+          <div class="col-3">
+            <label>#PRAZO_OBRAS (dias)</label>
+            <input type="number" name="PRAZO_OBRAS" id="PRAZO_OBRAS" />
+          </div>
+          <div class="col-3">
+            <label>#FORMA_OBRAS</label>
+            <select name="FORMA_OBRAS" id="FORMA_OBRAS">
+              <option value="">Selecione</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+            </select>
+          </div>
+          <div class="col-3">
+            <label>#Data_de_EMISSAO (auto)</label>
+            <input type="text" name="Data_de_EMISSAO" id="DATA_EMISSAO" readonly />
+          </div>
+          <div class="col-3">
+            <label>#INICIO_DAS_OBRAS (auto)</label>
+            <input type="text" name="INICIO_DAS_OBRAS" id="INICIO_OBRAS" readonly />
+          </div>
+          <div class="col-3">
+            <label>#FIM_DAS_OBRAS (auto)</label>
+            <input type="text" name="FIM_DAS_OBRAS" id="FIM_OBRAS" readonly />
+          </div>
+          <div class="col-3">
+            <label>#OBRAS_60</label>
+            <input type="text" name="OBRAS_60" id="OBRAS_60" readonly />
+          </div>
+          <div class="col-3">
+            <label>#OBRAS_120</label>
+            <input type="text" name="OBRAS_120" id="OBRAS_120" readonly />
+          </div>
+          <div class="col-3">
+            <label>#OBRAS_365</label>
+            <input type="text" name="OBRAS_365" id="OBRAS_365" readonly />
+          </div>
+          <div class="col-3">
+            <label>#OBRA_CRONOGRAMA_DA_DISTRIBUIDORA</label>
+            <input type="text" name="OBRA_CRONOGRAMA_DA_DISTRIBUIDORA" id="OBRA_CRONOGRAMA" readonly />
+          </div>
+          <!-- FORMA DE EXECUÇÃO e CONTRATOS -->
+
+          <div class="col-3">
+            <label>#NUMERO_CONTRATO_EXECUCAO_A</label>
+            <input type="text" name="NUMERO_CONTRATO_EXECUCAO_A" id="CONTRATO_A" readonly />
+          </div>
+          <div class="col-3">
+            <label>#DATA_CELEBRACAO_A</label>
+            <input type="text" name="DATA_CELEBRACAO_A" id="CELEBRACAO_A"readonly  />
+          </div>
+          <div class="col-3">
+            <label>#NUMERO_CONTRATO_EXECUCAO_B</label>
+            <input type="text" name="NUMERO_CONTRATO_EXECUCAO_B" id="CONTRATO_B" readonly />
+          </div>
+          <div class="col-3">
+            <label>#DATA_CELEBRACAO_B</label>
+            <input type="text" name="DATA_CELEBRACAO_B" id="CELEBRACAO_B"  readonly/>
+          </div>
+          <div class="col-3">
+            <label>#NUMERO_CONTRATO_EXECUCAO_C</label>
+            <input type="text" name="NUMERO_CONTRATO_EXECUCAO_C" id="CONTRATO_C" readonly />
+          </div>
+          <div class="col-3">
+            <label>#DATA_CELEBRACAO_C</label>
+            <input type="text" name="DATA_CELEBRACAO_C" id="CELEBRACAO_C"  readonly/>
+          </div>
+
+
+          <!-- ====== CAMPOS COMPLEMENTARES ====== -->
+          <div class="col-3">
+            <label>#CRONOGRAMA_DATA_DA_ENTRADA_EM_OPERACAO_EM_TESTE_E_COMERCIAL</label>
+            <input type="date" name="CRONOGRAMA_DATA_DA_ENTRADA_EM_OPERACAO_EM_TESTE_E_COMERCIAL"
+              id="CRONOGRAMA_DATA_DA_ENTRADA_EM_OPERACAO_EM_TESTE_E_COMERCIAL" />
+          </div>
+
+          <div class="col-3">
+            <label>#NUM_TERMOS_DO_COMPROMISSO_DE_RESTITUICAO_DE_VALORES</label>
+            <input type="text" name="NUM_TERMOS_DO_COMPROMISSO_DE_RESTITUICAO_DE_VALORES"
+              id="NUM_TERMOS_DO_COMPROMISSO_DE_RESTITUICAO_DE_VALORES" />
+          </div>
+
+          <div class="col-3">
+            <label>#DATA_DE_ENERGIZACAO</label>
+            <input type="date" name="DATA_DE_ENERGIZACAO" id="DATA_DE_ENERGIZACAO" />
+          </div>
+
+          <!-- Acessantes -->
+          <div class="col-4">
+            <label>#ACESSANTE_1</label>
+            <input type="text" name="ACESSANTE_1" id="ACESSANTE_1" />
+          </div>
+          <div class="col-4">
+            <label>#CARGO_A_1</label>
+            <input type="text" name="CARGO_A_1" id="CARGO_A_1" />
+          </div>
+          <div class="col-4">
+            <label>#CPF_A_1</label>
+            <input type="text" name="CPF_A_1" id="CPF_A_1" class="cpf-cnpj" maxlength="18"/>
+          </div>
+
+          <div class="col-4">
+            <label>#ACESSANTE_2</label>
+            <input type="text" name="ACESSANTE_2" id="ACESSANTE_2" />
+          </div>
+          <div class="col-4">
+            <label>#CARGO_A_2</label>
+            <input type="text" name="CARGO_A_2" id="CARGO_A_2"  />
+          </div>
+          <div class="col-4">
+            <label>#CPF_A_2</label>
+            <input type="text" name="CPF_A_2" id="CPF_A_2" class="cpf-cnpj" maxlength="18" />
+          </div>
+
+          <div class="col-4">
+            <label>#ACESSANTE_3</label>
+            <input type="text" name="ACESSANTE_3" id="ACESSANTE_3" />
+          </div>
+          <div class="col-4">
+            <label>#CARGO_A_3</label>
+            <input type="text" name="CARGO_A_3" id="CARGO_A_3" />
+          </div>
+          <div class="col-4">
+            <label>#CPF_A_3</label>
+            <input type="text" name="CPF_A_3" id="CPF_A_3" class="cpf-cnpj" maxlength="18"/>
+          </div>
+
+          <!-- Testemunhas -->
+          <div class="col-4">
+            <label>#TESTEMUNHA_1</label>
+            <input type="text" name="TESTEMUNHA_1" id="TESTEMUNHA_1" />
+          </div>
+          <div class="col-4">
+            <label>#CARGO_T_1</label>
+            <input type="text" name="CARGO_T_1" id="CARGO_T_1" />
+          </div>
+          <div class="col-4">
+            <label>#CPF_T_1</label>
+            <input type="text" name="CPF_T_1" id="CPF_T_1" class="cpf-cnpj" maxlength="18"/>
+          </div>
+
+          <div class="col-4">
+            <label>#TESTEMUNHA_2</label>
+            <input type="text" name="TESTEMUNHA_2" id="TESTEMUNHA_2" />
+          </div>
+          <div class="col-4">
+            <label>#CARGO_T_2</label>
+            <input type="text" name="CARGO_T_2" id="CARGO_T_2" />
+          </div>
+          <div class="col-4">
+            <label>#CPF_T_2</label>
+            <input type="text" name="CPF_T_2" id="CPF_T_2" class="cpf-cnpj" maxlength="18"/>
+          </div>
+          <div class="col-3">
+            <label>#MODELO_CUSD</label>
+            <select name="MODELO_CUSD" id="MODELO_CUSD"></select>
+          </div>
+          <div class="col-3">
+            <label>#MODELO_CCER</label>
+            <select name="MODELO_CCER" id="MODELO_CCER"></select>
+          </div>
+          <div class="col-3">
+            <label>#MODELO_OBRAS</label>
+            <select name="MODELO_OBRAS" id="MODELO_OBRAS"></select>
+          </div>
+
+          <!-- BOTÕES -->
+          <div class="col-12" style="display:flex; gap:8px; justify-content:flex-end">
+            <button type="button" id="btnSalvar" class="btn btn-primary">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Status CUSD/CCER/OBRAS -->
+  <div id="modalStatus" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <strong>Atualizar Status (CUSD / CCER / OBRAS)</strong>
+        <div>
+          <button id="btnCloseStatus" class="btn">Fechar</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="grid">
+          <div class="col-3">
+            <label>Status do Sistema (controla Analítico)</label>
+            <select name="STATUS_SISTEMA" id="STATUS_SISTEMA">
+              <option value="">(EM ANDAMENTO)</option>
+              <option>CANCELADO</option>
+              <option>CONCLUIDO</option>
+            </select>
+          </div>
+          <div class="col-3">
+            <label>Data de Conclusão</label>
+            <input type="date" name="DATA_CONCLUSAO" id="DATA_CONCLUSAO" readonly/>
+          </div>
+          <div class="col-3">
+            <label>Status CUSD</label>
+            <select name="STATUS_CUSD" id="STATUS_CUSD">
+              <option>NÃO SE APLICA</option>
+              <option>PENDENTE</option>
+              <option>CUSD GERADO</option>
+            </select>
+          </div>
+          <div class="col-3">
+            <label>Status CCER</label>
+            <select name="STATUS_CCER" id="STATUS_CCER">
+              <option>NÃO SE APLICA</option>
+              <option>PENDENTE</option>
+              <option>CCER GERADO</option>
+            </select>
+          </div>
+          <div class="col-3">
+            <label>Status OBRAS</label>
+            <select name="STATUS_OBRAS" id="STATUS_OBRAS">
+              <option>NÃO SE APLICA</option>
+              <option>PENDENTE</option>
+              <option>TDO GERADO</option>
+            </select>
+          </div>
+          <div class="col-12" style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px">
+            <button id="btnSalvarStatus" class="btn btn-primary">Salvar Status</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    $('#btnNovo').addEventListener('click', ()=> openModal());
+  </script>
+</body>
+
+</html>

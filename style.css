@@ -1,0 +1,273 @@
+/* ================================
+   VARIÁVEIS GERAIS (tema escuro padrão)
+   ================================ */
+:root{
+  --bg: #0b1220;
+  --card: #111a2b;
+  --muted: #7a8aa0;
+  --text: #e6eefc;
+  --primary: #6646f7;
+  --primary-800:#960af3;
+  --accent: #06d6a0;
+  --danger:#ff6b6b;
+  --warning:#ffd166;
+  --success:#00d68f;
+  --shadow: 0 20px 40px rgba(0,0,0,.35);
+  --radius: 16px;
+}
+
+/* ======= TEMA CLARO ======= */
+body.light {
+  --bg: #f0f2f5;          /* fundo geral um pouco mais quente */
+  --card: #ffffff;        /* cards brancos */
+  --muted: #666666;       /* texto secundário mais escuro */
+  --text: #222222;        /* texto principal bem visível */
+  --primary: #6646f7;     
+  --primary-800: #960af3;
+  --accent: #0cb47a;
+  --danger:#d94c4c;
+  --warning:#e4b600;
+  --success:#00a46b;
+  --shadow: 0 4px 16px rgba(0,0,0,.15);
+}
+
+/* Header e barra superior mais claros no modo claro */
+body.light header {
+  background: rgba(255,255,255,.8);
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  backdrop-filter: blur(8px);
+}
+
+/* Cabeçalho da tabela */
+body.light thead th {
+  background: #e5e7eb;   /* cinza claro */
+  color: #222;           /* texto escuro */
+  border-bottom: 1px solid rgba(0,0,0,.1);
+}
+
+/* Borda e fundo dos inputs */
+body.light input[type="text"],
+body.light input[type="number"],
+body.light input[type="date"],
+body.light select,
+body.light textarea {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.15);
+  color: #222;
+}
+
+/* Links e botões ficam mais visíveis */
+body.light button,
+body.light .btn {
+  border:1px solid rgba(0,0,0,.15);
+  background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(230,230,230,.8));
+  color: #222;
+}
+body.light .btn-primary {
+  background: linear-gradient(180deg, var(--primary), var(--primary-800));
+  color: #fff;
+}
+
+/* ================================
+   RESET
+   ================================ */
+*{ box-sizing:border-box }
+html, body{ height:100% }
+
+/* ================================
+   BODY
+   ================================ */
+body{
+  margin:0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color:var(--text);
+  background: var(--bg); /* agora depende da variável */
+  min-height:100vh;
+}
+
+/* ================================
+   CABEÇALHO
+   ================================ */
+header{
+  position:sticky; top:0; z-index:9000;
+  backdrop-filter: blur(10px);
+  background: rgba(10,17,32,.6);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.container{ max-width:1200px; margin:0 auto; padding:16px; }
+
+.brand{ display:flex; align-items:center; gap:12px }
+.brand h1{ font-size: clamp(18px, 2.6vw, 28px); margin:0; font-weight:700 }
+.brand small{ color:var(--muted) }
+
+/* ================================
+   BARRA DE BOTÕES
+   ================================ */
+.toolbar{
+  display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;
+  position:relative; z-index:10002;
+}
+button, .btn{
+  appearance:none;
+  border:1px solid rgba(255,255,255,.08);
+  color:var(--text);
+  cursor:pointer;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:600;
+  transition:.2s transform, .2s box-shadow, .2s background;
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+button:hover{
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+.btn-primary{ background: linear-gradient(180deg, var(--primary), var(--primary-800)); border-color: rgba(0,0,0,.2) }
+.btn-danger{  background: linear-gradient(180deg, #ff7a7a, #c94141) }
+
+/* ================================
+   CONTEÚDO PRINCIPAL
+   ================================ */
+main{ padding:24px 0 }
+
+.card{
+  background: var(--card);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding:14px;
+}
+
+/* ================================
+   ABAS
+   ================================ */
+.tabs{ display:flex; gap:6px; margin-bottom:14px }
+.tab{
+  padding:10px 14px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.1);
+  cursor:pointer;
+  color:var(--muted);
+  background:transparent;
+}
+.tab.active{
+  color:var(--text);
+  background: rgba(255,255,255,.06);
+}
+
+/* ================================
+   TABELA
+   ================================ */
+.table-wrap{
+  overflow:auto;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.1);
+  position:relative; z-index:1;
+}
+table{ width:100%; border-collapse:collapse; min-width:960px; }
+thead th{
+  position:sticky; top:0; z-index:1;
+  background:#0f1829;
+  border-bottom:1px solid rgba(255,255,255,.14);
+}
+th, td{ padding:12px 10px; text-align:left; white-space:nowrap; }
+tbody tr{ border-top:1px solid rgba(255,255,255,.06) }
+tbody tr:hover{ background: rgba(255,255,255,.04) }
+
+.pill{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 10px; border-radius:999px;
+  font-size:12px;
+  border:1px solid rgba(255,255,255,.12)
+}
+.pill.warn{ background: rgba(255,209,102,.12); border-color: rgba(255,209,102,.3) }
+.pill.ok{   background: rgba(0,214,143,.12); border-color: rgba(0,214,143,.3) }
+.pill.bad{  background: rgba(255,107,107,.12); border-color: rgba(255,107,107,.35) }
+
+.table-wrap thead{ pointer-events:none; }
+.hidden{ display:none !important }
+
+/* ================================
+   MODAIS
+   ================================ */
+.modal{
+  position:fixed; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  background: rgba(0,0,0,.5);
+  padding:16px;
+  z-index:10000;
+}
+.modal-dialog{
+  width: min(980px, 100%);
+  background: var(--card);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  box-shadow: var(--shadow);
+  max-height:92vh;
+  overflow:auto;
+  z-index:10001;
+}
+.modal-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px;
+  border-bottom:1px solid rgba(255,255,255,.08)
+}
+.modal-body{ padding:16px }
+
+/* ================================
+   GRID DE FORMULÁRIOS
+   ================================ */
+.grid{ display:grid; grid-template-columns: repeat(12, 1fr); gap:12px }
+.col-12{ grid-column: span 12 }
+.col-6{  grid-column: span 6  }
+.col-4{  grid-column: span 4  }
+.col-3{  grid-column: span 3  }
+.col-2{  grid-column: span 2  }
+@media (max-width: 900px){
+  .col-6, .col-4, .col-3, .col-2{ grid-column: span 12 }
+}
+
+/* ================================
+   CAMPOS DE FORMULÁRIO
+   ================================ */
+label {
+  font-size:12px;
+  color: var(--muted);
+  display:block;
+  margin-bottom:6px;
+  white-space:normal;
+  word-break:break-word;
+  overflow-wrap:break-word;
+  max-width: 100%;
+}
+input[type="text"], input[type="number"], input[type="date"],
+select, textarea{
+  width:100%;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.04);
+  color:var(--text);
+  outline:none;
+}
+input[readonly], textarea[readonly]{ opacity:.8 }
+
+/* ================================
+   RODAPÉ
+   ================================ */
+.footer{
+  margin-top:28px;
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+}
+
+details#dev-tests{ margin-top:16px; color:var(--muted); }
+details#dev-tests summary{ cursor:pointer; }
+details#dev-tests li.pass{ color:#09d3ac; }
+details#dev-tests li.fail{ color:#ff7a7a; }
+
+select option {
+  color: #000;
+  background: #fff;
+}
