@@ -532,3 +532,14 @@ document.addEventListener('DOMContentLoaded', function() {
   tipoContrato.addEventListener('change', atualizarDetalhamento);
   atualizarDetalhamento();
 });
+
+// Certifique-se que o DOM está carregado antes de adicionar o evento
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('btnSalvar').addEventListener('click', function() {
+    // Aqui vai a lógica para salvar os dados do formulário
+    // Exemplo:
+    // const form = document.getElementById('form');
+    // const data = new FormData(form);
+    // ...salvar os dados...
+  });
+});
