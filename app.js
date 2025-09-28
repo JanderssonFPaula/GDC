@@ -325,7 +325,7 @@
     // ==========================
     $('#btnImport').addEventListener('click', ()=>{
       const inp = document.createElement('input');
-      inp.type='file'; inp.accept='.xlsx,.xls';
+      inp.type='file'; inp.accept='.xlsx,.xls, xlsm';
       inp.onchange = (ev)=>{
         const file = ev.target.files[0];
         if(!file) return;
