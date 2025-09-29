@@ -562,3 +562,11 @@
       }
     });
   }
+
+  function toBR(dateStr) {
+    if (!dateStr) return '';
+    // Aceita tanto yyyy-mm-dd quanto yyyy-mm-ddTHH:mm:ss
+    const [y, m, d] = dateStr.split('T')[0].split('-');
+    if (!y || !m || !d) return dateStr;
+    return `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+  }
